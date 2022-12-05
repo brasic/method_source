@@ -1,3 +1,5 @@
+require "ripper"
+
 module MethodSource
 
   module CodeHelpers
@@ -64,19 +66,10 @@ module MethodSource
     #   complete_expression?("class Hello; end") #=> true
     #   complete_expression?("class 123") #=> SyntaxError: unexpected tINTEGER
     def complete_expression?(str)
-      old_verbose = $VERBOSE
-      $VERBOSE = nil
-
-      catch(:valid) do
-        eval("BEGIN{throw :valid}\n#{str}")
-      end
-
-      # Assert that a line which ends with a , or \ is incomplete.
-      str !~ /[,\\]\s*\z/
+      return false if str.match?(/[,\\]\s*\z/)
+      SyntaxChecker.new(str).parse
     rescue IncompleteExpression
       false
-    ensure
-      $VERBOSE = old_verbose
     end
 
     private
@@ -117,6 +110,25 @@ module MethodSource
       end
 
       buffer
+    end
+
+    # A simple Ripper parser that only cares about errors.
+    class SyntaxChecker < Ripper
+      def parse
+        super
+        true
+      end
+
+      def initialize(src, *)
+        @src = src
+        super
+      end
+
+      def compile_error(msg)
+        raise SyntaxError.new(msg.delete("\n"))
+      end
+
+      alias on_parse_error compile_error
     end
 
     # An exception matcher that matches only subsets of SyntaxErrors that can be
