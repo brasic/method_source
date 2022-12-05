@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<rspec>.freeze, ["~> 3.6"])
       s.add_development_dependency(%q<rake>.freeze, ["~> 0.9"])
+      s.add_development_dependency(%q<benchmark-ips>.freeze, ["~> 2.10.0"])
     else
       s.add_dependency(%q<rspec>.freeze, ["~> 3.6"])
       s.add_dependency(%q<rake>.freeze, ["~> 0.9"])

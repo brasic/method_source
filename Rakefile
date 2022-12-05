@@ -79,3 +79,19 @@ task :pushgems => :gems do
     end
   end
 end
+
+task :benchmark do
+  $LOAD_PATH.unshift(File.join(direc, "lib"))
+  require "benchmark/ips"
+  require "method_source"
+  modules = [MethodSource, MethodSource::CodeHelpers]
+  methods = modules.flat_map do |mod|
+    mod.methods(false).map { |name| mod.method(name) }
+  end
+
+  Benchmark.ips do |bm|
+    bm.report("Method#source") do
+      methods.each(&:source)
+    end
+  end
+end
